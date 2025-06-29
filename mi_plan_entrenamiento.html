@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan Interactivo de Entrenamiento en Trotadora</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Zenith Recovery (Warm neutrals like stone/beige with muted teal and sky blue accents) -->
+    <!-- Application Structure Plan: A multi-section SPA with a main dashboard, a detailed interactive training plan, a knowledge base for safety/science, and tools. This non-linear structure replaces the report's linear format, allowing the user to access relevant information on-demand (e.g., quickly check today's workout or review safety guidelines) which is more practical for daily use. -->
+    <!-- Visualization & Content Choices: Training Plan -> Interactive Accordion/Table (Goal: Organize/Guide) - breaks down complex routines. HR Zones -> Dynamic Bar Chart (Goal: Compare/Inform) - more engaging than a table. Safety/Science Info -> Collapsible Cards (Goal: Inform) - prevents information overload. All choices prioritize clarity and usability for a user focused on their daily training. Library: Chart.js for the bar chart. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            color: #0369a1; /* text-sky-700 */
+            border-bottom-color: #0369a1;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 320px;
+            max-height: 400px;
+            width: 100%;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <header class="py-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-sky-800 text-center">Plan de Entrenamiento Interactivo</h1>
+            <p class="text-center text-stone-600 mt-2">Tu guía personalizada para la pérdida de grasa y mejora del rendimiento post-recuperación.</p>
+        </header>
+
+        <nav class="bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-md rounded-lg mb-8">
+            <ul class="flex justify-center items-center flex-wrap">
+                <li><a href="#panel" class="nav-link active text-sm sm:text-base font-medium p-4 inline-block border-b-2 border-transparent hover:text-sky-600 hover:border-sky-600">Mi Panel</a></li>
+                <li><a href="#plan" class="nav-link text-sm sm:text-base font-medium p-4 inline-block border-b-2 border-transparent hover:text-sky-600 hover:border-sky-600">Plan de Entrenamiento</a></li>
+                <li><a href="#fundamentos" class="nav-link text-sm sm:text-base font-medium p-4 inline-block border-b-2 border-transparent hover:text-sky-600 hover:border-sky-600">Fundamentos y Seguridad</a></li>
+                <li><a href="#consejos" class="nav-link text-sm sm:text-base font-medium p-4 inline-block border-b-2 border-transparent hover:text-sky-600 hover:border-sky-600">Consejos Adicionales</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <!-- SECTION: Mi Panel -->
+            <section id="panel" class="content-section active">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-stone-200">
+                    <h2 class="text-2xl font-bold text-sky-700 mb-4">Bienvenido a tu Panel de Control</h2>
+                    <p class="text-stone-600 mb-6">Esta es tu central de operaciones. Aquí encontrarás un resumen de tu perfil, tus objetivos y acceso rápido a las herramientas clave para tu entrenamiento. El objetivo es que tengas una visión clara y motivadora de tu progreso.</p>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-stone-100 p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-3 text-teal-700">Tu Perfil</h3>
+                            <ul class="space-y-2 text-stone-700">
+                                <li><span class="font-semibold">Edad:</span> 32 años</li>
+                                <li><span class="font-semibold">Condición:</span> Obesidad tipo 1</li>
+                                <li><span class="font-semibold">Recuperación:</span> Post-Hernioplastia Crural (Finales de Abril 2025)</li>
+                                <li><span class="font-semibold">Nivel Actual:</span> Activo, 8km/h a 4° por 25 min sin dolor.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-stone-100 p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-3 text-teal-700">Tus Metas</h3>
+                            <ul class="space-y-2 text-stone-700">
+                                <li class="flex items-start"><span class="text-teal-600 mr-2 mt-1">&#10003;</span><span>Pérdida de grasa corporal.</span></li>
+                                <li class="flex items-start"><span class="text-teal-600 mr-2 mt-1">&#10003;</span><span>Mejorar la resistencia cardiovascular.</span></li>
+                                <li class="flex items-start"><span class="text-teal-600 mr-2 mt-1">&#10003;</span><span>Aumentar la velocidad en carrera.</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                         <h3 class="text-xl font-semibold mb-3 text-teal-700">Zonas de Frecuencia Cardíaca (FC)</h3>
+                         <p class="text-stone-600 mb-4">Usa este gráfico para guiar la intensidad de tus entrenamientos. Pasar el ratón sobre cada barra te dará los detalles de la zona, incluyendo el Esfuerzo Percibido (RPE). Tu Frecuencia Cardíaca Máxima estimada es de 188 lpm.</p>
+                        <div class="chart-container">
+                            <canvas id="hrZoneChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: Plan de Entrenamiento -->
+            <section id="plan" class="content-section">
+                 <div class="bg-white p-6 rounded-xl shadow-lg border border-stone-200">
+                    <h2 class="text-2xl font-bold text-sky-700 mb-4">Plan de Entrenamiento Progresivo</h2>
+                    <p class="text-stone-600 mb-6">Aquí encontrarás el corazón de tu programa: las tres fases de entrenamiento diseñadas para llevarte desde la adaptación inicial hasta la optimización de tu rendimiento. Selecciona una fase para explorar las sesiones de cada semana. Recuerda que la progresión se basa en la ausencia de dolor.</p>
+                    <div id="training-plan-container" class="space-y-4"></div>
+                 </div>
+            </section>
+
+            <!-- SECTION: Fundamentos y Seguridad -->
+            <section id="fundamentos" class="content-section">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-stone-200">
+                    <h2 class="text-2xl font-bold text-sky-700 mb-4">Fundamentos y Guías de Seguridad</h2>
+                    <p class="text-stone-600 mb-6">El conocimiento es poder. En esta sección, entenderás el "porqué" de tu entrenamiento y las pautas clave para una recuperación segura. Dedica tiempo a leer esta información para entrenar con confianza y eficacia.</p>
+                    <div class="space-y-4">
+                        <div id="safety-guidelines-container"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: Consejos Adicionales -->
+            <section id="consejos" class="content-section">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-stone-200">
+                    <h2 class="text-2xl font-bold text-sky-700 mb-4">Consejos para el Éxito Sostenible</h2>
+                     <p class="text-stone-600 mb-6">Tu entrenamiento es una pieza clave, pero el éxito a largo plazo depende de un enfoque integral. Aquí tienes recomendaciones sobre nutrición, entrenamiento de fuerza complementario y la importancia del descanso para maximizar tus resultados.</p>
+                    <div class="space-y-4">
+                        <div id="extra-tips-container"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center py-8 text-stone-500">
+            <p>&copy; 2025 Plan de Entrenamiento Interactivo. Creado para tu éxito.</p>
+            <p class="text-sm mt-1">Consulta siempre a tu médico antes de iniciar un nuevo programa de ejercicios.</p>
+        </footer>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const contentSections = document.querySelectorAll('.content-section');
+
+    const workoutData = {
+        phase1: {
+            title: "Fase 1: Rehabilitación y Adaptación (Semanas 1-4)",
+            description: "Foco en consolidar la recuperación, aumentar la duración del LISS y familiarizarse con la trotadora de forma segura, priorizando siempre la ausencia de dolor en la ingle.",
+            sessions: [
+                {
+                    title: "LISS Progresivo (3-4 días/semana)",
+                    duration: "30-45 minutos",
+                    details: [
+                        { time: "0-5 min", activity: "Calentamiento: Caminata 4.0-5.5 km/h, 0-1° inclinación.", rpe: "2-4", zone: "1-2" },
+                        { time: "5-25 min", activity: "Parte Principal: Aumentar gradualmente la velocidad de 6.0 a 7.5 km/h y la inclinación de 2° a 3°.", rpe: "4-5", zone: "2" },
+                        { time: "25-35+ min", activity: "Opcional (semanas 2+): Mantener trote actual de 8.0 km/h, 4° si no hay dolor. Aumentar duración progresivamente.", rpe: "5-6", zone: "2-3" },
+                        { time: "Últimos 5 min", activity: "Enfriamiento: Caminata reduciendo velocidad a 3.5 km/h y 0° inclinación.", rpe: "2-3", zone: "1" }
+                    ]
+                }
+            ]
+        },
+        phase2: {
+            title: "Fase 2: Construcción y Quema de Grasa (Semanas 5-8)",
+            description: "Introducción gradual de HIIT, aumento de la intensidad en LISS y caminatas inclinadas para potenciar la quema de grasa y la resistencia.",
+            sessions: [
+                {
+                    title: "LISS Inclinado (2-3 días/semana)",
+                    duration: "40 minutos",
+                    details: [
+                        { time: "0-5 min", activity: "Calentamiento: Caminata 4.0-5.5 km/h, 0-2° inclinación.", rpe: "2-4", zone: "1-2" },
+                        { time: "5-20 min", activity: "Parte Principal: Caminata/Trote aumentando velocidad de 6.0 a 7.0 km/h e inclinación de 4° a 6°.", rpe: "4-6", zone: "2-3" },
+                        { time: "20-35 min", activity: "Alternar 5 min a 7.5 km/h (5°) con 5 min a 8.5 km/h (3°).", rpe: "6-7", zone: "3" },
+                        { time: "35-40 min", activity: "Enfriamiento: Reducir velocidad y inclinación gradualmente.", rpe: "2-3", zone: "1" }
+                    ]
+                },
+                {
+                    title: "HIIT Introductorio (1-2 días/semana)",
+                    duration: "30 minutos",
+                    details: [
+                        { time: "0-10 min", activity: "Calentamiento: 5 min caminata, 5 min trote ligero a 7.0 km/h (2°).", rpe: "2-5", zone: "1-2" },
+                        { time: "10-25 min", activity: "5 ciclos de: 1 min de trabajo (subir de 10 a 11.5 km/h y 3-4°) + 2 min de recuperación (caminata 5.0 km/h, 0°).", rpe: "7-9 (trabajo)", zone: "4" },
+                        { time: "25-30 min", activity: "Enfriamiento: Caminata suave.", rpe: "2-3", zone: "1" }
+                    ]
+                }
+            ]
+        },
+        phase3: {
+            title: "Fase 3: Optimización y Rendimiento (Semanas 9+)",
+            description: "Rutinas desafiantes para maximizar velocidad y resistencia, con HIIT avanzado y LISS de larga duración.",
+            sessions: [
+                {
+                    title: "HIIT Avanzado (2-3 días/semana)",
+                    duration: "30-35 minutos",
+                    details: [
+                        { time: "0-10 min", activity: "Calentamiento: Caminata y trote progresivo hasta 9.0 km/h (2°).", rpe: "2-6", zone: "1-3" },
+                        { time: "10-28 min", activity: "5-6 ciclos de: 1 min de trabajo (subir progresivamente de 12 km/h (5°) a 16-18 km/h (10°)) + 2 min de recuperación (caminata 5.0 km/h, 0°).", rpe: "8-10 (trabajo)", zone: "4" },
+                        { time: "28-35 min", activity: "Enfriamiento: Caminata larga y suave.", rpe: "2-3", zone: "1" }
+                    ]
+                },
+                 {
+                    title: "LISS Larga Duración / Alta Inclinación (2-3 días/semana)",
+                    duration: "45-60 minutos",
+                    details: [
+                        { time: "0-5 min", activity: "Calentamiento: Caminata 5.0 km/h, 0-2°.", rpe: "2-3", zone: "1" },
+                        { time: "5-55 min", activity: "Parte Principal: Trote/caminata subiendo la inclinación cada 10 min (de 6° a 10°) mientras se ajusta la velocidad (6.0-9.0 km/h) para mantener RPE 6-8.", rpe: "6-8", zone: "3-4" },
+                        { time: "55-60 min", activity: "Enfriamiento: Reducción gradual.", rpe: "2-3", zone: "1" }
+                    ]
+                }
+            ]
+        }
+    };
+    
+    const safetyData = [
+        {
+            title: "Pautas de Recuperación Post-Hernioplastia",
+            content: `La progresión debe ser guiada por la **ausencia de dolor**. El hecho de que ya trotes sin molestias es una excelente señal.
+            <div class="overflow-x-auto mt-4"><table class="w-full text-sm text-left text-stone-600">
+                <thead class="text-xs text-teal-800 uppercase bg-teal-50"><tr>
+                    <th scope="col" class="px-4 py-2">Fase</th><th scope="col" class="px-4 py-2">Tiempo</th><th scope="col" class="px-4 py-2">Actividades Recomendadas</th><th scope="col" class="px-4 py-2">A Evitar</th>
+                </tr></thead>
+                <tbody>
+                    <tr class="bg-white border-b"><td class="px-4 py-2 font-medium">Inicial</td><td class="px-4 py-2">1-10 Días</td><td class="px-4 py-2">Paseos cortos y suaves.</td><td class="px-4 py-2">Levantar peso, esfuerzos, abdominales.</td></tr>
+                    <tr class="bg-stone-50 border-b"><td class="px-4 py-2 font-medium">Intermedia</td><td class="px-4 py-2">2-6 Semanas</td><td class="px-4 py-2">Aumento gradual de caminata, posible bicicleta estática.</td><td class="px-4 py-2">Deportes de contacto, levantamiento de peso.</td></tr>
+                    <tr class="bg-white"><td class="px-4 py-2 font-medium">Avanzada</td><td class="px-4 py-2">2-3+ Meses</td><td class="px-4 py-2">Deporte de baja intensidad, natación, elíptica.</td><td class="px-4 py-2">Deportes de alto impacto sin aprobación médica.</td></tr>
+                </tbody></table></div>`
+        },
+        {
+            title: "HIIT vs. LISS: La Combinación Ganadora",
+            content: "Tu plan combina lo mejor de dos mundos. **LISS (Estado Estacionario de Baja Intensidad)** construye tu base aeróbica y es excelente para quemar grasa durante el ejercicio. **HIIT (Entrenamiento de Intervalos de Alta Intensidad)** es más eficiente en tiempo, mejora tu velocidad y eleva tu metabolismo por horas después de entrenar (efecto EPOC)."
+        },
+        {
+            title: "El Poder de la Inclinación",
+            content: "Usar la inclinación es una estrategia clave. Aumenta la intensidad y el gasto calórico de forma significativa, activando más músculos (glúteos, isquiotibiales) con un menor impacto en tus articulaciones. Es ideal para progresar de forma segura durante tu recuperación."
+        },
+        {
+            title: "Cardio en Ayunas: ¿Sí o No?",
+            content: "Aunque puede aumentar la quema de grasa *durante* la sesión, los riesgos (mareos, fatiga, posible pérdida muscular) superan los beneficios, especialmente en tu fase de recuperación. **Prioriza la seguridad:** realiza las sesiones de alta intensidad (HIIT) por la tarde con energía suficiente. Si en fases avanzadas decides probar el cardio en ayunas, debe ser exclusivamente LISS de baja intensidad y con una hidratación perfecta."
+        },
+        {
+            title: "Neurociencia: Entendiendo el Dolor",
+            content: "Es vital diferenciar entre la molestia muscular del esfuerzo (buena señal) y un dolor agudo en la zona de la cirugía (señal de parar). El ejercicio controlado ayuda a tu sistema nervioso a modular el dolor y reduce el miedo a moverse. No temas a la fatiga muscular, pero sé estricto con cualquier dolor en la zona de la ingle."
+        }
+    ];
+
+    const tipsData = [
+         {
+            title: "Nutrición: El Motor de la Pérdida de Grasa",
+            content: "El ejercicio complementa, pero no reemplaza, un **déficit calórico** constante. Consume proteínas para reparar músculos y carbohidratos saludables para tener energía. Prioriza alimentos integrales, frutas y verduras. La hidratación es clave: bebe entre 8 y 10 vasos de agua al día."
+        },
+         {
+            title: "Entrenamiento de Fuerza Complementario",
+            content: "La fuerza preserva la masa muscular mientras pierdes grasa. **Precaución:** evita levantar cargas pesadas o ejercicios que generen presión abdominal. Comienza con ejercicios de core de bajo impacto (puente de glúteos) y, con aprobación médica, introduce ejercicios de brazos y piernas con la espalda bien apoyada."
+        },
+        {
+            title: "Descanso y Recuperación",
+            content: "El descanso es cuando tu cuerpo se adapta y se hace más fuerte. Dormir lo suficiente (7-9 horas) es tan importante como el entrenamiento. Gestiona el estrés, ya que puede afectar negativamente a la recuperación y la pérdida de peso."
+        },
+         {
+            title: "Calentamiento y Enfriamiento: No Negociables",
+            content: "Cada sesión debe empezar con un **calentamiento** de 5-10 minutos para preparar tus músculos y terminar con un **enfriamiento** de 5-10 minutos para una recuperación gradual. Realiza estiramientos suaves al final, evitando siempre cualquier tensión en la zona de la ingle."
+        }
+    ];
+
+    function createAccordionItem(item, index) {
+        return `
+            <div class="border border-stone-200 rounded-lg overflow-hidden">
+                <button class="accordion-button w-full text-left p-4 bg-stone-100 hover:bg-stone-200 focus:outline-none transition" data-index="${index}">
+                    <h3 class="text-lg font-semibold text-teal-700">${item.title}</h3>
+                </button>
+                <div class="accordion-content">
+                    <div class="p-4 text-stone-600">${item.content}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    function createWorkoutPlanHTML(data) {
+        let html = '';
+        for (const phaseKey in data) {
+            const phase = data[phaseKey];
+            html += `<div class="border border-stone-200 rounded-lg overflow-hidden mb-4">
+                        <button class="accordion-button w-full text-left p-4 bg-sky-100 hover:bg-sky-200 focus:outline-none transition">
+                            <h3 class="text-xl font-bold text-sky-800">${phase.title}</h3>
+                            <p class="text-sm text-sky-700 mt-1">${phase.description}</p>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-4 space-y-4">`;
+            
+            phase.sessions.forEach(session => {
+                html += `<div class="bg-stone-50 p-4 rounded-lg border">
+                            <h4 class="font-semibold text-lg text-teal-800">${session.title}</h4>
+                            <p class="text-sm text-stone-500 mb-2">Duración Total: ${session.duration}</p>
+                            <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-stone-700 uppercase bg-stone-200">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-2">Tiempo</th>
+                                        <th scope="col" class="px-4 py-2">Actividad (Velocidad / Inclinación)</th>
+                                        <th scope="col" class="px-4 py-2">RPE</th>
+                                        <th scope="col" class="px-4 py-2">Zona FC</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+                session.details.forEach((detail, index) => {
+                    html += `<tr class="${index % 2 === 0 ? 'bg-white' : 'bg-stone-50'} border-b border-stone-100">
+                                <td class="px-4 py-2 font-medium">${detail.time}</td>
+                                <td class="px-4 py-2">${detail.activity}</td>
+                                <td class="px-4 py-2">${detail.rpe}</td>
+                                <td class="px-4 py-2">${detail.zone}</td>
+                            </tr>`;
+                });
+                html += `</tbody></table></div></div>`;
+            });
+
+            html += `</div></div></div>`;
+        }
+        return html;
+    }
+    
+    document.getElementById('training-plan-container').innerHTML = createWorkoutPlanHTML(workoutData);
+    document.getElementById('safety-guidelines-container').innerHTML = safetyData.map(createAccordionItem).join('');
+    document.getElementById('extra-tips-container').innerHTML = tipsData.map(createAccordionItem).join('');
+
+    const hrZoneCtx = document.getElementById('hrZoneChart').getContext('2d');
+    new Chart(hrZoneCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Zona 1', 'Zona 2 (LISS)', 'Zona 3', 'Zona 4 (HIIT)'],
+            datasets: [{
+                label: 'LPM (Latidos por Minuto)',
+                data: [113, 132, 150, 169],
+                backgroundColor: [
+                    'rgba(20, 184, 166, 0.2)', // Teal
+                    'rgba(14, 165, 233, 0.2)', // Sky
+                    'rgba(249, 115, 22, 0.2)',  // Orange
+                    'rgba(220, 38, 38, 0.2)'    // Red
+                ],
+                borderColor: [
+                    'rgba(13, 148, 136, 1)',
+                    'rgba(2, 132, 199, 1)',
+                    'rgba(234, 88, 12, 1)',
+                    'rgba(185, 28, 28, 1)'
+                ],
+                borderWidth: 1,
+                barThickness: 50,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Frecuencia Cardíaca (lpm)' }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                title: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const data = {
+                                'Zona 1': { rpe: '2-3', goal: 'Calentamiento/Recuperación', range: '94-113' },
+                                'Zona 2 (LISS)': { rpe: '4-5', goal: 'Quema de grasa, Resistencia basal', range: '113-132' },
+                                'Zona 3': { rpe: '6-7', goal: 'Resistencia avanzada', range: '132-150' },
+                                'Zona 4 (HIIT)': { rpe: '8-9', goal: 'Velocidad, VO2máx', range: '150-169' }
+                            };
+                            const zoneData = data[context.label];
+                            return [
+                                `FC: ${zoneData.range} lpm`,
+                                `RPE: ${zoneData.rpe}`,
+                                `Objetivo: ${zoneData.goal}`
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+
+            navLinks.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+
+            contentSections.forEach(section => {
+                if (section.id === targetId) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+
+    document.querySelectorAll('.accordion-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const accordionContent = button.nextElementSibling;
+            button.classList.toggle('active');
+
+            if (button.classList.contains('active')) {
+                accordionContent.style.maxHeight = accordionContent.scrollHeight + "px";
+            } else {
+                accordionContent.style.maxHeight = 0;
+            }
+        });
+    });
+
+});
+</script>
+
+</body>
+</html>
